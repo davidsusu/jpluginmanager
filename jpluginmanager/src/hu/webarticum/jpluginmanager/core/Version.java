@@ -3,7 +3,7 @@ package hu.webarticum.jpluginmanager.core;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Version {
+public class Version implements Comparable<Version> {
     
     private final int major;
     
@@ -73,7 +73,13 @@ public class Version {
     public String getBuild() {
         return build;
     }
-    
+
+    @Override
+    public int compareTo(Version o) {
+        // TODO
+        return 0;
+    }
+
     public boolean matches(String versionMatcher) {
         // TODO
         return false;

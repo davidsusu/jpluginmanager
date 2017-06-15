@@ -1,6 +1,7 @@
 package hu.webarticum.jpluginmanager.loader.js;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -15,20 +16,45 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import hu.webarticum.jpluginmanager.core.AbstractDirectoryPluginLoader;
 import hu.webarticum.jpluginmanager.core.Plugin;
 import hu.webarticum.jpluginmanager.core.PluginContainer;
+import hu.webarticum.jpluginmanager.core.PluginLoader;
 
-public class DefaultJsPluginLoader extends AbstractDirectoryPluginLoader {
+public class DefaultJsPluginLoader implements PluginLoader {
 
+    private final File pluginDirectory;
+    
     public DefaultJsPluginLoader(File pluginDirectory) {
-        super(pluginDirectory, "js");
+        this.pluginDirectory = pluginDirectory;
     }
-
+    
     @Override
-    protected PluginContainer loadPluginContainer(File file, String pluginName) {
+    public List<PluginContainer> loadAll() {
+        List<PluginContainer> pluginContainers = new ArrayList<PluginContainer>();
+        File[] files = pluginDirectory.listFiles(new JsFileFilter());
+        if (files != null) {
+            for (File file: files) {
+                PluginContainer pluginContainer = loadPluginContainer(file);
+                if (pluginContainer != null) {
+                    pluginContainers.add(pluginContainer);
+                }
+            }
+        }
+        return pluginContainers;
+    }
+    
+    private class JsFileFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".js");
+        }
+        
+    }
+    
+    protected PluginContainer loadPluginContainer(File file) {
         ClassLoader classLoader = getClass().getClassLoader(); // XXX
-        PluginInvocationHandler pluginInvocationHandler = new PluginInvocationHandler(file, pluginName);
+        PluginInvocationHandler pluginInvocationHandler = new PluginInvocationHandler(file);
         if (!pluginInvocationHandler.load()) {
             return null;
         }
@@ -40,15 +66,12 @@ public class DefaultJsPluginLoader extends AbstractDirectoryPluginLoader {
         
         final File file;
         
-        final String pluginName;
-        
         ScriptEngine scriptEngine;
         
         Plugin scriptPluginObject;
         
-        PluginInvocationHandler(File file, String pluginName) {
+        PluginInvocationHandler(File file) {
             this.file = file;
-            this.pluginName = pluginName;
         }
         
         boolean load() {

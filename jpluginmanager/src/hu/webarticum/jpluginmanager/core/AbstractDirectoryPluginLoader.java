@@ -23,8 +23,8 @@ public abstract  class AbstractDirectoryPluginLoader implements PluginLoader {
             if (files != null) {
                 for (File file: files) {
                     String fileName = file.getName();
-                    String pluginClassName = getClassNameByFileName(fileName);
-                    PluginContainer pluginContainer = loadPluginContainer(file, pluginClassName);
+                    String pluginName = getPluginNameByFileName(fileName);
+                    PluginContainer pluginContainer = loadPluginContainer(file, pluginName);
                     if (pluginContainer != null) {
                         pluginContainers.add(pluginContainer);
                     }
@@ -33,13 +33,13 @@ public abstract  class AbstractDirectoryPluginLoader implements PluginLoader {
             return pluginContainers;
         }
         
-        private String getClassNameByFileName(String fileName) {
+        private String getPluginNameByFileName(String fileName) {
             String result = fileName.substring(0, fileName.length() - 4);
             result = result.replaceAll("@.*$", "");
             return result;
         }
 
-        protected abstract PluginContainer loadPluginContainer(File file, String pluginClassName);
+        protected abstract PluginContainer loadPluginContainer(File file, String pluginName);
         
         private class FileExtensionFilter implements FilenameFilter {
 

@@ -17,12 +17,12 @@ public class DefaultJarPluginLoader extends AbstractDirectoryPluginLoader {
     }
     
     @Override
-    protected PluginContainer loadPluginContainer(File file, String pluginClassName) {
+    protected PluginContainer loadPluginContainer(File file, String pluginName) {
         PluginContainer pluginContainer = null;
         try {
             ClassLoader pluginClassLoader = new URLClassLoader(new URL[] {file.toURI().toURL()}, getClass().getClassLoader());
             @SuppressWarnings("unchecked")
-            Class<Plugin> pluginClass = (Class<Plugin>)Class.forName(pluginClassName, true, pluginClassLoader);
+            Class<Plugin> pluginClass = (Class<Plugin>)Class.forName(pluginName, true, pluginClassLoader);
             Plugin plugin = pluginClass.newInstance();
             pluginContainer = new PluginContainer(pluginClassLoader, plugin);
         } catch (MalformedURLException e) {

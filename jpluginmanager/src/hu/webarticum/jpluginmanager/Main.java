@@ -11,6 +11,7 @@ import hu.webarticum.jpluginmanager.core.CompositePluginLoader;
 import hu.webarticum.jpluginmanager.core.Plugin;
 import hu.webarticum.jpluginmanager.core.PluginLoader;
 import hu.webarticum.jpluginmanager.core.PluginManager;
+import hu.webarticum.jpluginmanager.core.PluginResolver;
 import hu.webarticum.jpluginmanager.core.SimplePluginLoader;
 import hu.webarticum.jpluginmanager.loader.jar.DefaultJarPluginLoader;
 import hu.webarticum.jpluginmanager.loader.js.DefaultJsPluginLoader;
@@ -26,6 +27,7 @@ public class Main {
             new DefaultJsPluginLoader(new File(path))
         );
         PluginManager pluginManager = new PluginManager(pluginLoader);
+        new PluginResolver().startAll(pluginManager);
         for (HelloExtensionInterface helloExtension: pluginManager.getExtensions(HelloExtensionInterface.class)) {
             helloExtension.hello();
         }
@@ -38,7 +40,9 @@ public class Main {
     }
 
     public static class SampleInnerPlugin implements Plugin {
-
+        
+        private boolean active = false;
+        
         @Override
         public String getName() {
             return "hu.webarticum.jpluginmanager.SampleInnerPlugin";
@@ -55,8 +59,19 @@ public class Main {
         }
 
         @Override
-        public boolean validate() {
+        public boolean start() {
+            active = true;
             return true;
+        }
+
+        @Override
+        public void stop() {
+            active = false;
+        }
+        
+        @Override
+        public boolean isActive() {
+            return active;
         }
 
         @SuppressWarnings("unchecked")

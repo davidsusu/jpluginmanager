@@ -3,12 +3,22 @@ package hu.webarticum.jpluginmanager.core;
 
 public class PluginResolver {
     
-    // TODO / XXX
-    // PluginContainer.[[try?]resolve|start|stop]() ?
-    // Plugin.[start|stop] ? (lifecycle events)
-    
     public void resolveAll(PluginManager pluginManager) {
+        
         // TODO
+        
+        for (PluginContainer pluginContainer: pluginManager.getPluginContainers()) {
+            pluginContainer.setResolved(true);
+        }
+    }
+
+    public void startAll(PluginManager pluginManager) {
+        resolveAll(pluginManager);
+        for (PluginContainer pluginContainer: pluginManager.getPluginContainers()) {
+            if (pluginContainer.isResolved()) {
+                pluginContainer.getPlugin().start();
+            }
+        }
     }
     
 }

@@ -1,6 +1,8 @@
 (function(){
+	var active = false;
+	
 	return {
-
+		
 	    getName: function () {
 	    	return "hu.webarticum.jpluginmanager.testjsplugin.TestJsPlugin";
 	    },
@@ -13,8 +15,17 @@
 	    	return "Hello JS";
 	    },
 
-	    validate: function () {
+	    start: function () {
+	    	active = true;
 	    	return true;
+	    },
+
+	    stop: function () {
+	    	active = false;
+	    },
+
+	    isActive: function () {
+	    	return active;
 	    },
 	    
 		getExtensions: function (type) {

@@ -24,7 +24,7 @@ public class SimplePluginLoader implements PluginLoader {
         for (Class<? extends Plugin> pluginClass: pluginClasses) {
             try {
                 Plugin plugin = pluginClass.newInstance();
-                pluginContainers.add(new PluginContainer(pluginClass.getClassLoader(), plugin));
+                pluginContainers.add(new PluginContainer(plugin));
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

@@ -3,8 +3,6 @@ package hu.webarticum.jpluginmanager.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.webarticum.jpluginmanager.core.PluginContainer.Status;
-
 public class PluginManager {
     
     private final PluginLoader pluginLoader;
@@ -25,6 +23,7 @@ public class PluginManager {
         if (!loaded || force) {
             pluginContainers.clear();
             pluginContainers.addAll(pluginLoader.loadAll());
+            loaded = true;
         }
     }
     
@@ -33,19 +32,15 @@ public class PluginManager {
         return new ArrayList<PluginContainer>(pluginContainers);
     }
 
-    public List<PluginContainer> getPluginContainers(PluginContainer.Status status) {
+    public List<PluginContainer> getActivePluginContainers() {
         load();
         List<PluginContainer> filteredPluginContainers = new ArrayList<PluginContainer>();
         for (PluginContainer pluginContainer: pluginContainers) {
-            if (pluginContainer.getStatus() == status) {
+            if (pluginContainer.getPlugin().isActive()) {
                 filteredPluginContainers.add(pluginContainer);
             }
         }
         return filteredPluginContainers;
-    }
-
-    public List<PluginContainer> getActivePluginContainers() {
-        return getPluginContainers(Status.ACTIVE);
     }
     
     public <T> List<T> getExtensions(Class<T> type) {

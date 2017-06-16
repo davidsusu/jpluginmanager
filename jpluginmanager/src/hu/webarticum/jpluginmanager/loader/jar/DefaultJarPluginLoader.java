@@ -67,7 +67,7 @@ public class DefaultJarPluginLoader implements PluginLoader {
                     continue;
                 }
                 
-                PluginContainer pluginContainer = new PluginContainer(pluginClassLoader, plugin);
+                PluginContainer pluginContainer = new PluginContainer(plugin);
                 
                 pluginContainers.add(pluginContainer);
             }

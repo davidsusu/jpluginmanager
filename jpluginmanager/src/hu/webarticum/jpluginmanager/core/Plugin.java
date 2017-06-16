@@ -10,7 +10,11 @@ public interface Plugin {
     
     public String getLabel();
     
-    public boolean validate();
+    public boolean start();
+    
+    public void stop();
+    
+    public boolean isActive();
     
     public <T> List<T> getExtensions(Class<T> type);
     

@@ -59,7 +59,7 @@ public class DefaultJsPluginLoader implements PluginLoader {
             return null;
         }
         Plugin plugin = (Plugin)Proxy.newProxyInstance(classLoader, new Class[] {Plugin.class}, pluginInvocationHandler);
-        return new PluginContainer(classLoader, plugin);
+        return new PluginContainer(plugin);
     }
     
     private class PluginInvocationHandler implements InvocationHandler {

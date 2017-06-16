@@ -12,6 +12,7 @@ import hu.webarticum.jpluginmanager.core.Dependency;
 import hu.webarticum.jpluginmanager.core.NoDependency;
 import hu.webarticum.jpluginmanager.core.Plugin;
 import hu.webarticum.jpluginmanager.core.PluginVersionDependency;
+import hu.webarticum.jpluginmanager.core.UnresolvableDependency;
 import hu.webarticum.jpluginmanager.core.Version;
 
 public class DefaultAdapterFactory implements AdapterFactory {
@@ -78,8 +79,7 @@ public class DefaultAdapterFactory implements AdapterFactory {
                 }
                 return new CompositeDependency(subDependencies);
             } else {
-                // XXX
-                return null;
+                return new UnresolvableDependency();
             }
         }
         

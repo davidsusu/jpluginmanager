@@ -75,13 +75,68 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public int compareTo(Version o) {
-        // TODO
-        return 0;
+    public int compareTo(Version other) {
+        if (major != other.major) {
+            return Integer.compare(major, other.major);
+        } else if (minor != other.minor) {
+            return Integer.compare(minor, other.minor);
+        } else if (patch != other.patch) {
+            return Integer.compare(patch, other.patch);
+        } else if (!pre.equals(other.pre)) {
+            
+            // TODO
+            return 0;
+            
+        } else {
+            return 0;
+        }
     }
 
     public boolean matches(String versionMatcher) {
-        // TODO
+        versionMatcher = versionMatcher.replaceAll("\\s+", " ").trim();
+        String[] subMatchers = versionMatcher.split(" \\|\\| ");
+        for (String subMatcher: subMatchers) {
+            String[] subSubMatchers = subMatcher.split(" ");
+            boolean matches = true;
+            for (String subSubMatcher: subSubMatchers) {
+                if (!matchesSingle(subSubMatcher)) {
+                    matches = false;
+                    break;
+                }
+            }
+            if (matches) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean matchesSingle(String singleVersionMatcher) {
+        {
+            Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)\\.(?:\\d+)\\.(?:\\d+)(?:\\-[0-9A-Za-z\\-]+)?(?:\\+[0-9A-Za-z-]+)?)$");
+            Matcher matcher = pattern.matcher(singleVersionMatcher);
+            if (matcher.find()) {
+                String operator = matcher.group(1);
+                String cmpVersionString = matcher.group(2);
+                Version cmpVersion = new Version(cmpVersionString);
+                int cmp = compareTo(cmpVersion);
+                if (operator.equals("<")) {
+                    return cmp < 0;
+                } else if (operator.equals(">")) {
+                    return cmp > 0;
+                } else if (operator.equals("<=")) {
+                    return cmp <= 0;
+                } else if (operator.equals(">=")) {
+                    return cmp >= 0;
+                } else {
+                    // XXX check build...
+                    return cmp == 0;
+                }
+            }
+        }
+        
+        // TODO other pattern types
+        
         return false;
     }
 

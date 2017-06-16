@@ -16,7 +16,7 @@ public class Version implements Comparable<Version> {
     private final String build;
     
     public Version(String versionString) {
-        Pattern pattern = Pattern.compile("^[=v]*(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:\\-([0-9A-Za-z\\-]+))?(?:\\+([0-9A-Za-z-]+))?)?)?$");
+        Pattern pattern = Pattern.compile("^[=v]*(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:\\-([0-9A-Za-z\\.\\-]+))?(?:\\+([0-9A-Za-z\\.\\-]+))?)?)?$");
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {
             String majorMatch = matcher.group(1);
@@ -78,10 +78,10 @@ public class Version implements Comparable<Version> {
     public String toString() {
         String result = major + "." + minor + "." + patch;
         if (!pre.isEmpty()) {
-            result += result + "-" + pre;
+            result += "-" + pre;
         }
         if (!build.isEmpty()) {
-            result += result + "+" + build;
+            result += "+" + build;
         }
         return result;
     }
@@ -95,13 +95,49 @@ public class Version implements Comparable<Version> {
         } else if (patch != other.patch) {
             return Integer.compare(patch, other.patch);
         } else if (!pre.equals(other.pre)) {
-            
-            // TODO
-            return 0;
-            
+            return comparePreParts(pre, other.pre);
         } else {
             return 0;
         }
+    }
+    
+    private int comparePreParts(String pre1, String pre2) {
+        if (pre1.isEmpty()) {
+            if (pre2.isEmpty()) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else if (pre2.isEmpty()) {
+            return -1;
+        }
+        
+        Pattern pattern = Pattern.compile("\\D+|\\d+");
+        Matcher matcher1 = pattern.matcher(pre1);
+        Matcher matcher2 = pattern.matcher(pre2);
+        while (matcher1.find()) {
+            if (!matcher2.find()) {
+                return -1;
+            }
+            String match1 = matcher1.group();
+            String match2 = matcher2.group();
+            if (match1.matches("\\d+")) {
+                if (match2.matches("\\d+")) {
+                    return Integer.compare(Integer.parseInt(match1), Integer.parseInt(match2));
+                } else {
+                    return -1;
+                }
+            } else if (match2.matches("\\d+")) {
+                return 1;
+            } else {
+                int strCmp = match1.compareTo(match2);
+                if (strCmp != 0) {
+                    return strCmp;
+                }
+            }
+        }
+        
+        return matcher2.find() ? 1 : 0;
     }
 
     public boolean matches(String versionMatcher) {
@@ -129,7 +165,7 @@ public class Version implements Comparable<Version> {
         }
         
         {
-            Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)(?:\\.(?:\\d+)(?:\\.(?:\\d+)(?:\\-[0-9A-Za-z\\-]+)?(?:\\+[0-9A-Za-z-]+)?)?)?)$");
+            Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)(?:\\.(?:\\d+)(?:\\.(?:\\d+)(?:\\-[0-9A-Za-z\\.\\-]+)?(?:\\+[0-9A-Za-z\\.\\-]+)?)?)?)$");
             Matcher matcher = pattern.matcher(singleVersionMatcher);
             if (matcher.find()) {
                 String operator = matcher.group(1);
@@ -145,8 +181,15 @@ public class Version implements Comparable<Version> {
                 } else if (operator.equals(">=")) {
                     return cmp >= 0;
                 } else {
-                    // XXX check build...
-                    return cmp == 0;
+                    if (cmp == 0) {
+                        if (singleVersionMatcher.indexOf('+') >= 0) {
+                            return toString().equals(cmpVersionString);
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
                 }
             }
         }
@@ -205,8 +248,12 @@ public class Version implements Comparable<Version> {
             } else if (!patchMatcher.matches("|\\*")) {
                 return false;
             }
-            
-            if (!preMatcher.isEmpty()) {
+
+            if (preMatcher.isEmpty()) {
+                if (!pre.isEmpty()) {
+                    return false;
+                }
+            } else {
                 if (pre.isEmpty()) {
                     return false;
                 }
@@ -215,7 +262,7 @@ public class Version implements Comparable<Version> {
                     return false;
                 }
             }
-
+            
             if (!buildMatcher.isEmpty()) {
                 if (build.isEmpty()) {
                     return false;

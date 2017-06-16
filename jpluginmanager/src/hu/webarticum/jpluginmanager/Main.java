@@ -22,8 +22,11 @@ import hu.webarticum.jpluginmanager.loader.js.DefaultJsPluginLoader;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        System.out.print("Plugin dir (see resources/sample for test plugins): ");
-        String path = new BufferedReader(new InputStreamReader(System.in)).readLine();
+        //System.out.print("Plugin dir (see resources/sample for test plugins): ");
+        //String path = new BufferedReader(new InputStreamReader(System.in)).readLine();
+        
+        String path = "/homedata/horvath/eclipse/orarend/git/jpluginmanager/jpluginmanager/resources/sample";
+        
         PluginLoader pluginLoader = new CompositePluginLoader(
             new SimplePluginLoader(SampleInnerPlugin.class),
             new DefaultJarPluginLoader(new File(path)),
@@ -48,7 +51,7 @@ public class Main {
         
         @Override
         public String getName() {
-            return "hu.webarticum.jpluginmanager.SampleInnerPlugin";
+            return "sample-inner-plugin";
         }
 
         @Override

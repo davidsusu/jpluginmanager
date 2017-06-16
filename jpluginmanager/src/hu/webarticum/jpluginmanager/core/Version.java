@@ -16,7 +16,7 @@ public class Version implements Comparable<Version> {
     private final String build;
     
     public Version(String versionString) {
-        Pattern pattern = Pattern.compile("^[=v]*(\\d+)\\.(\\d+)\\.(\\d+)(?:\\-([0-9A-Za-z\\-]+))?(?:\\+([0-9A-Za-z-]+))?$");
+        Pattern pattern = Pattern.compile("^[=v]*(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:\\-([0-9A-Za-z\\-]+))?(?:\\+([0-9A-Za-z-]+))?)?)?$");
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {
             String majorMatch = matcher.group(1);
@@ -24,9 +24,9 @@ public class Version implements Comparable<Version> {
             String patchMatch = matcher.group(3);
             String preMatch = matcher.group(4);
             String buildMatch = matcher.group(5);
-            this.major = Integer.parseInt(majorMatch);
-            this.minor = Integer.parseInt(minorMatch);
-            this.patch = Integer.parseInt(patchMatch);
+            this.major = majorMatch == null ? 0 : Integer.parseInt(majorMatch);
+            this.minor = minorMatch == null ? 0 : Integer.parseInt(minorMatch);
+            this.patch = patchMatch == null ? 0 : Integer.parseInt(patchMatch);
             this.pre = preMatch == null ? "" : preMatch;
             this.build = buildMatch == null ? "" : buildMatch;
         } else {
@@ -124,12 +124,12 @@ public class Version implements Comparable<Version> {
     }
     
     public boolean matchesSingle(String singleVersionMatcher) {
-        if (singleVersionMatcher.matches("\\[x\\*](\\.\\[x\\*])+")) {
+        if (singleVersionMatcher.matches("\\*(\\.\\*)+")) {
             return true;
         }
         
         {
-            Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)\\.(?:\\d+)\\.(?:\\d+)(?:\\-[0-9A-Za-z\\-]+)?(?:\\+[0-9A-Za-z-]+)?)$");
+            Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)(?:\\.(?:\\d+)(?:\\.(?:\\d+)(?:\\-[0-9A-Za-z\\-]+)?(?:\\+[0-9A-Za-z-]+)?)?)?)$");
             Matcher matcher = pattern.matcher(singleVersionMatcher);
             if (matcher.find()) {
                 String operator = matcher.group(1);
@@ -151,9 +151,84 @@ public class Version implements Comparable<Version> {
             }
         }
         
-        // TODO other pattern types
+        if (singleVersionMatcher.indexOf('*') >= 0) {
+            String remain = singleVersionMatcher.replaceAll("^v", "");
+            String majorMatcher = "";
+            String minorMatcher = "";
+            String patchMatcher = "";
+            String preMatcher = "";
+            String buildMatcher = "";
+            
+            int plusPos = singleVersionMatcher.indexOf('+');
+            if (plusPos >= 0) {
+                remain = singleVersionMatcher.substring(0, plusPos);
+                buildMatcher = singleVersionMatcher.substring(plusPos + 1);
+            }
+            
+            int minusPos = remain.indexOf('-');
+            if (minusPos >= 0) {
+                remain = singleVersionMatcher.substring(0, minusPos);
+                preMatcher = singleVersionMatcher.substring(minusPos + 1);
+            }
+            
+            String[] numericTokens = remain.split("\\.");
+            if (numericTokens.length > 0) {
+                majorMatcher = numericTokens[0];
+            }
+            if (numericTokens.length > 1) {
+                minorMatcher = numericTokens[1];
+            }
+            if (numericTokens.length > 2) {
+                patchMatcher = numericTokens[2];
+            }
+            
+            if (majorMatcher.matches("\\d+")) {
+                if (major != Integer.parseInt(majorMatcher)) {
+                    return false;
+                }
+            } else if (!majorMatcher.matches("|\\*")) {
+                return false;
+            }
+            
+            if (minorMatcher.matches("\\d+")) {
+                if (minor != Integer.parseInt(minorMatcher)) {
+                    return false;
+                }
+            } else if (!minorMatcher.matches("|\\*")) {
+                return false;
+            }
+            
+            if (patchMatcher.matches("\\d+")) {
+                if (patch != Integer.parseInt(patchMatcher)) {
+                    return false;
+                }
+            } else if (!patchMatcher.matches("|\\*")) {
+                return false;
+            }
+            
+            if (!preMatcher.isEmpty()) {
+                if (pre.isEmpty()) {
+                    return false;
+                }
+                String prePattern = preMatcher.replaceAll("[\\.\\-]", "\\\\$0").replaceAll("\\*", ".*");
+                if (!pre.matches(prePattern)) {
+                    return false;
+                }
+            }
+
+            if (!buildMatcher.isEmpty()) {
+                if (build.isEmpty()) {
+                    return false;
+                }
+                String buildPattern = buildMatcher.replaceAll("[\\.\\-]", "\\\\$0").replaceAll("\\*", ".*");
+                if (!build.matches(buildPattern)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
         
         return false;
     }
-
 }

@@ -12,7 +12,9 @@
 	    },
 
 	    getDependency: function () {
-	    	return "test-jar-plugin@0.1.0";
+	    	return {
+	    		"sample-inner-plugin": "0.1.*"
+	    	}
 	    },
 
 	    getLabel: function () {

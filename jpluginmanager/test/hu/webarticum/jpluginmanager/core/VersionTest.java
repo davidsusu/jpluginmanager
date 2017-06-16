@@ -10,6 +10,24 @@ public class VersionTest {
     @Test
     public void testParsing() {
         {
+            Version version = new Version("2");
+            assertEquals(2, version.getMajor());
+            assertEquals(0, version.getMinor());
+            assertEquals(0, version.getPatch());
+            assertEquals("", version.getPre());
+            assertEquals("", version.getBuild());
+        }
+        
+        {
+            Version version = new Version("1.4");
+            assertEquals(1, version.getMajor());
+            assertEquals(4, version.getMinor());
+            assertEquals(0, version.getPatch());
+            assertEquals("", version.getPre());
+            assertEquals("", version.getBuild());
+        }
+        
+        {
             Version version = new Version("2.1.3");
             assertEquals(2, version.getMajor());
             assertEquals(1, version.getMinor());
@@ -59,9 +77,27 @@ public class VersionTest {
             assertFalse(version.matches(">=5.7.1"));
             assertTrue(version.matches("<3.2.1"));
             assertFalse(version.matches("<=1.0.1"));
+
+            assertFalse(version.matches("2.3.3-*"));
         }
         
-        // TODO
+        {
+            Version version = new Version("2.3.3-rc-1");
+
+            assertTrue(version.matches(">1.6.0"));
+            
+            assertFalse(version.matches("1.6.*"));
+            assertTrue(version.matches("2.*"));
+            assertFalse(version.matches("2.1.*"));
+            assertTrue(version.matches("2.3.*"));
+
+            assertTrue(version.matches("2.3.3-*"));
+            assertFalse(version.matches("2.3.3-x-*"));
+            assertTrue(version.matches("2.3.3-rc-*"));
+            assertTrue(version.matches("2.3.*-r*1"));
+
+            assertFalse(version.matches("2.3.3-rc-1+*"));
+        }
     }
 
     @Test
@@ -72,8 +108,6 @@ public class VersionTest {
             assertTrue(version.matches(">2.3.0 <3.0.1"));
             assertFalse(version.matches(">=2.3.0 <=2.3.1"));
         }
-        
-        // TODO
     }
 
     @Test
@@ -84,8 +118,6 @@ public class VersionTest {
             assertTrue(version.matches(">2.3.0 <3.0.1 || >=2.3.0 <=2.3.1"));
             assertFalse(version.matches(">=2.3.0 <=2.3.1 || =4.5.6"));
         }
-        
-        // TODO
     }
 
 }

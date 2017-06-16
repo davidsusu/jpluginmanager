@@ -6,7 +6,9 @@ public interface Plugin {
     
     public String getName();
     
-    public String getVersion();
+    public Version getVersion();
+    
+    public Dependency getDependency();
     
     public String getLabel();
     

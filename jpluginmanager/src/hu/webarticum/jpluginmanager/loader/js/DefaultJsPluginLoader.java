@@ -3,13 +3,12 @@ package hu.webarticum.jpluginmanager.loader.js;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -51,85 +50,60 @@ public class DefaultJsPluginLoader implements PluginLoader {
         }
         
     }
-    
+
     protected PluginContainer loadPluginContainer(File file) {
-        ClassLoader classLoader = getClass().getClassLoader(); // XXX
-        PluginInvocationHandler pluginInvocationHandler = new PluginInvocationHandler(file);
-        if (!pluginInvocationHandler.load()) {
+        String scriptContent;
+        
+        try {
+            scriptContent = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
-        Plugin plugin = (Plugin)Proxy.newProxyInstance(classLoader, new Class[] {Plugin.class}, pluginInvocationHandler);
-        return new PluginContainer(plugin);
+        
+        Map<String, String> metaData = parseMetaData(scriptContent);
+
+        ScriptEngine scriptEngine = getScriptEngine();
+        if (scriptEngine == null) {
+            return null;
+        }
+        
+        Object scriptObject;
+        try {
+            scriptObject = scriptEngine.eval(scriptContent);
+        } catch (ScriptException e) {
+            e.printStackTrace();
+            return null;
+        }
+        
+        for (AdapterFactory adapterFactory: getAdapterFactories()) {
+            Object adaptedObject = ((Invocable)scriptEngine).getInterface(scriptObject, adapterFactory.getAdaptedInterface());
+            if (adaptedObject != null) {
+                Plugin plugin = adapterFactory.createAdapter(scriptEngine, adaptedObject, metaData);
+                return new PluginContainer(plugin);
+            }
+        }
+        
+        return null;
     }
     
-    private class PluginInvocationHandler implements InvocationHandler {
+    private Map<String, String> parseMetaData(String scriptContent) {
+        // TODO
         
-        final File file;
+        return new HashMap<String, String>();
+    }
+
+    private ScriptEngine getScriptEngine() {
+        ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+        return scriptEngineManager.getEngineByMimeType("text/javascript");
+    }
+    
+    private List<AdapterFactory> getAdapterFactories() {
+        List<AdapterFactory> adapterFactories = new ArrayList<AdapterFactory>();
         
-        ScriptEngine scriptEngine;
+        adapterFactories.add(new DefaultAdapterFactory());
         
-        Plugin scriptPluginObject;
-        
-        PluginInvocationHandler(File file) {
-            this.file = file;
-        }
-        
-        boolean load() {
-            String scriptContent;
-            
-            try {
-                scriptContent = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-            
-            ScriptEngine scriptEngine = getScriptEngine();
-            if (scriptEngine == null) {
-                return false;
-            }
-            
-            try {
-                Object scriptObject = scriptEngine.eval(scriptContent);
-                scriptPluginObject = ((Invocable)scriptEngine).getInterface(scriptObject, Plugin.class);
-            } catch (ScriptException e) {
-                e.printStackTrace();
-                return false;
-            }
-            
-            this.scriptEngine = scriptEngine;
-            
-            return true;
-        }
-        
-        private ScriptEngine getScriptEngine() {
-            ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-            return scriptEngineManager.getEngineByMimeType("text/javascript");
-        }
-        
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (scriptPluginObject == null) {
-                return null;
-            }
-            
-            Object result = method.invoke(scriptPluginObject, args);
-            
-            if (method.getName().equals("getExtensions")) {
-                Class<?> extensionClass = (Class<?>)args[0];
-                List<?> extensions = (List<?>)result;
-                List<Object> resultExtensions = new ArrayList<Object>();
-                for (Object extension: extensions) {
-                    resultExtensions.add(
-                        ((Invocable)scriptEngine).getInterface(extension, extensionClass)
-                    );
-                }
-                result = resultExtensions;
-            }
-            
-            return result;
-        }
-        
+        return adapterFactories;
     }
     
 }

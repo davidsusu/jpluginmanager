@@ -8,11 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.jpluginmanager.core.CompositePluginLoader;
+import hu.webarticum.jpluginmanager.core.Dependency;
+import hu.webarticum.jpluginmanager.core.NoDependency;
 import hu.webarticum.jpluginmanager.core.Plugin;
 import hu.webarticum.jpluginmanager.core.PluginLoader;
 import hu.webarticum.jpluginmanager.core.PluginManager;
 import hu.webarticum.jpluginmanager.core.PluginResolver;
 import hu.webarticum.jpluginmanager.core.SimplePluginLoader;
+import hu.webarticum.jpluginmanager.core.Version;
 import hu.webarticum.jpluginmanager.loader.jar.DefaultJarPluginLoader;
 import hu.webarticum.jpluginmanager.loader.js.DefaultJsPluginLoader;
 
@@ -49,8 +52,13 @@ public class Main {
         }
 
         @Override
-        public String getVersion() {
-            return "0.1.1";
+        public Version getVersion() {
+            return new Version("0.1.1");
+        }
+
+        @Override
+        public Dependency getDependency() {
+            return new NoDependency();
         }
 
         @Override

@@ -11,6 +11,10 @@
 	    	return "0.1.1";
 	    },
 
+	    getDependency: function () {
+	    	return "test-jar-plugin@0.1.0";
+	    },
+
 	    getLabel: function () {
 	    	return "Hello JS";
 	    },
@@ -29,7 +33,7 @@
 	    },
 	    
 		getExtensions: function (type) {
-			if (type.getSimpleName().equals("HelloExtensionInterface")) {
+			if (type.getName().equals("hu.webarticum.jpluginmanager.Main$HelloExtensionInterface")) {
 				return [{
 					
 					hello: function () {

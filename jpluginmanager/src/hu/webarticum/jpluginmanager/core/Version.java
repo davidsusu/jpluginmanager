@@ -73,6 +73,18 @@ public class Version implements Comparable<Version> {
     public String getBuild() {
         return build;
     }
+    
+    @Override
+    public String toString() {
+        String result = major + "." + minor + "." + patch;
+        if (!pre.isEmpty()) {
+            result += result + "-" + pre;
+        }
+        if (!build.isEmpty()) {
+            result += result + "+" + build;
+        }
+        return result;
+    }
 
     @Override
     public int compareTo(Version other) {
@@ -112,6 +124,10 @@ public class Version implements Comparable<Version> {
     }
     
     public boolean matchesSingle(String singleVersionMatcher) {
+        if (singleVersionMatcher.matches("\\[x\\*](\\.\\[x\\*])+")) {
+            return true;
+        }
+        
         {
             Pattern pattern = Pattern.compile("^(<|>|<=|>=|=?)v?((?:\\d+)\\.(?:\\d+)\\.(?:\\d+)(?:\\-[0-9A-Za-z\\-]+)?(?:\\+[0-9A-Za-z-]+)?)$");
             Matcher matcher = pattern.matcher(singleVersionMatcher);

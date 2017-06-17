@@ -16,6 +16,10 @@ public class Version implements Comparable<Version> {
     private final String build;
     
     public Version(String versionString) {
+        if (versionString == null) {
+            throw new NullPointerException();
+        }
+        
         Pattern pattern = Pattern.compile("^[=v]*(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(?:\\-([0-9A-Za-z\\.\\-]+))?(?:\\+([0-9A-Za-z\\.\\-]+))?)?)?$");
         Matcher matcher = pattern.matcher(versionString);
         if (matcher.find()) {

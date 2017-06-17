@@ -4,7 +4,7 @@
 	return {
 		
 	    getName: function () {
-	    	return "hu.webarticum.jpluginmanager.testjsplugin.TestJsPlugin";
+	    	return "test-strict-js-plugin";
 	    },
 
 	    getVersion: function () {
@@ -18,7 +18,7 @@
 	    },
 
 	    getLabel: function () {
-	    	return "Hello JS";
+	    	return "Test Strict JS Plugin";
 	    },
 
 	    start: function () {

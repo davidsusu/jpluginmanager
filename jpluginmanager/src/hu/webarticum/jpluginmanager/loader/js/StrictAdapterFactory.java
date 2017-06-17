@@ -15,29 +15,29 @@ import hu.webarticum.jpluginmanager.core.PluginVersionDependency;
 import hu.webarticum.jpluginmanager.core.UnresolvableDependency;
 import hu.webarticum.jpluginmanager.core.Version;
 
-public class DefaultAdapterFactory implements AdapterFactory {
-
+public class StrictAdapterFactory implements AdapterFactory {
+    
     @Override
     public Plugin createAdapter(ScriptEngine scriptEngine, Object adaptedObject, Map<String, String> metaData) {
-        if (!(adaptedObject instanceof DefaultAdaptedInterface)) {
+        if (!(adaptedObject instanceof StrictAdaptedInterface)) {
             throw new IllegalArgumentException("Wrong adapted object");
         }
         
-        DefaultAdaptedInterface adapted = (DefaultAdaptedInterface)adaptedObject;
-        return new DefaultAdapter(scriptEngine, adapted, metaData);
-    }
-
-    @Override
-    public Class<?> getAdaptedInterface() {
-        return DefaultAdaptedInterface.class;
+        StrictAdaptedInterface adapted = (StrictAdaptedInterface)adaptedObject;
+        return new StrictAdapter(scriptEngine, adapted, metaData);
     }
     
-    public class DefaultAdapter implements Plugin {
+    @Override
+    public Class<?> getAdaptedInterface() {
+        return StrictAdaptedInterface.class;
+    }
+    
+    public class StrictAdapter implements Plugin {
 
         private final ScriptEngine scriptEngine;
-        private final DefaultAdaptedInterface adapted;
+        private final StrictAdaptedInterface adapted;
         
-        public DefaultAdapter(ScriptEngine scriptEngine, DefaultAdaptedInterface adapted, Map<String, String> metaData) {
+        public StrictAdapter(ScriptEngine scriptEngine, StrictAdaptedInterface adapted, Map<String, String> metaData) {
             this.scriptEngine = scriptEngine;
             this.adapted = adapted;
         }
@@ -118,7 +118,7 @@ public class DefaultAdapterFactory implements AdapterFactory {
         
     }
 
-    public interface DefaultAdaptedInterface {
+    public interface StrictAdaptedInterface {
         
         public String getName();
         

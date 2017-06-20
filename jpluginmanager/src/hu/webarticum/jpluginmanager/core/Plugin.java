@@ -1,8 +1,7 @@
 package hu.webarticum.jpluginmanager.core;
 
-import java.util.List;
 
-public interface Plugin {
+public interface Plugin extends ExtensionSupplier {
     
     public String getName();
     
@@ -17,7 +16,5 @@ public interface Plugin {
     public void stop();
     
     public boolean isActive();
-    
-    public <T> List<T> getExtensions(Class<T> type);
     
 }

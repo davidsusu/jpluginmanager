@@ -3,7 +3,7 @@ package hu.webarticum.jpluginmanager.core;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PluginManager {
+public class PluginManager implements ExtensionSupplier {
     
     private final PluginLoader pluginLoader;
     
@@ -43,6 +43,7 @@ public class PluginManager {
         return filteredPluginContainers;
     }
     
+    @Override
     public <T> List<T> getExtensions(Class<T> type) {
         List<T> extensions = new ArrayList<T>();
         for (PluginContainer pluginContainer: getActivePluginContainers()) {
